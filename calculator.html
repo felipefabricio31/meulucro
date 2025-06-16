@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Margem de Contribuição</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    .results {
+      margin-top: 30px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      background-color: #f9f9f9;
+    }
+    .positivo {
+      color: green;
+      font-weight: bold;
+    }
+    .moderado {
+      color: orange;
+      font-weight: bold;
+    }
+    .negativo {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Calculadora de Margem de Contribuição</h1>
+
+    <label for="precoVenda">Preço de Venda (R$)</label>
+    <input type="number" id="precoVenda" step="0.01" oninput="calcular()" />
+
+    <label for="custoProduto">Custo do Produto (R$)</label>
+    <input type="number" id="custoProduto" step="0.01" oninput="calcular()" />
+
+    <label for="custosExtras">Custos Extras (R$)</label>
+    <input type="number" id="custosExtras" step="0.01" value="0" oninput="calcular()" />
+
+    <label for="aliquota">Alíquota de Impostos (%)</label>
+    <input type="number" id="aliquota" step="0.01" value="4" oninput="calcular()" />
+
+    <label for="taxaClassico">Taxa Clássico (R$)</label>
+    <input type="number" id="taxaClassico" step="0.01" value="8.85" oninput="calcular()" />
+
+    <label for="taxaPremium">Taxa Premium (R$)</label>
+    <input type="number" id="taxaPremium" step="0.01" value="12.69" oninput="calcular()" />
+
+    <label for="taxaFixa">Taxa Fixa (R$)</label>
+    <input type="number" id="taxaFixa" step="0.01" value="6.75" oninput="calcular()" />
+
+    <div class="results" id="resultado"></div>
+  </div>
+
+  <script>
+    function getMargemClass(pct) {
+      if (pct < 10) return 'negativo';
+      if (pct < 15) return 'moderado';
+      if (pct > 19) return 'positivo';
+      return '';
+    }
+
+    function getEmoji(pct) {
+      if (pct < 10) return '⚠️';
+      if (pct < 15) return '🟠';
+      if (pct > 19) return '💰';
+      return '';
+    }
+
+    function calcular() {
+      const precoVenda = parseFloat(document.getElementById('precoVenda').value) || 0;
+      const custoProduto = parseFloat(document.getElementById('custoProduto').value) || 0;
+      const custosExtras = parseFloat(document.getElementById('custosExtras').value) || 0;
+      const aliquota = parseFloat(document.getElementById('aliquota').value) || 0;
+      const taxaClassico = parseFloat(document.getElementById('taxaClassico').value) || 0;
+      const taxaPremium = parseFloat(document.getElementById('taxaPremium').value) || 0;
+      const taxaFixa = parseFloat(document.getElementById('taxaFixa').value) || 0;
+
+      const impostoValor = precoVenda * (aliquota / 100);
+
+      const custoTotalClassico = custoProduto + custosExtras + impostoValor + taxaClassico + taxaFixa;
+      const margemClassico = precoVenda - custoTotalClassico;
+      const margemClassicoPct = precoVenda > 0 ? (margemClassico / precoVenda) * 100 : 0;
+
+      const custoTotalPremium = custoProduto + custosExtras + impostoValor + taxaPremium + taxaFixa;
+      const margemPremium = precoVenda - custoTotalPremium;
+      const margemPremiumPct = precoVenda > 0 ? (margemPremium / precoVenda) * 100 : 0;
+
+      const classicoClass = getMargemClass(margemClassicoPct);
+      const premiumClass = getMargemClass(margemPremiumPct);
+      const classicoEmoji = getEmoji(margemClassicoPct);
+      const premiumEmoji = getEmoji(margemPremiumPct);
+
+      document.getElementById('resultado').innerHTML = `
+        <h3>Resultado</h3>
+        <p><strong>Impostos:</strong> R$ ${impostoValor.toFixed(2)}</p>
+        <p><strong>Custos Totais (Clássico):</strong> R$ ${custoTotalClassico.toFixed(2)}</p>
+        <p><strong>Margem de Contribuição (Clássico):</strong> <span class="${classicoClass}">${classicoEmoji} R$ ${margemClassico.toFixed(2)} (${margemClassicoPct.toFixed(2)}%)</span></p>
+        <hr />
+        <p><strong>Custos Totais (Premium):</strong> R$ ${custoTotalPremium.toFixed(2)}</p>
+        <p><strong>Margem de Contribuição (Premium):</strong> <span class="${premiumClass}">${premiumEmoji} R$ ${margemPremium.toFixed(2)} (${margemPremiumPct.toFixed(2)}%)</span></p>
+      `;
+    }
+  </script>
+</body>
+</html>
